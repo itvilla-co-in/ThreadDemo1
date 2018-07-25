@@ -1,0 +1,292 @@
+A thread  is nothing but a small process within a process executing your business logic/program that can run in parllel. All Java programs have at least one thread, known as the main thread, which is created by the Java Virtual Machine (JVM) at the program’s start, when the main() method is invoked with the main thread. 
+
+In a word document when you are typing some text word document also checks for spelling mistakes while you are typing. So typing in word document is one thread and spelling check program is a different thread. They both are running in parllel. Multi-threaded application that allows multiple thread execution at any particular time
+
+ Java concurrency  and multi-threading are the same things. 
+ 
+A process runs independently and isolated of other processes. It cannot directly access shared data in other processes. The resources of the process, e.g. memory and CPU time, are allocated to it via the operating system. For example your Java Web application running in a web container like apache is a process.
+A thread is a so called lightweight process. It has its own call stack, but can access shared data of other threads in the same process. Every thread has its own memory cache. If a thread reads shared data it stores this data in its own memory cache. A thread can re-read the shared data.
+A Java application runs by default in one process. Within a Java application you work with several threads to achieve parallel processing or asynchronous behavior.
+
+Synchronous vs. Asynchronous Execution
+ 
+The difference between synchronous and asynchronous execution may seem a bit confusing at first. Program execution in most high-level languages is usually very straightforward. Your program starts at the first line of source code and each line of code executed sequentially thereafter. Easy enough.
+ 
+Synchronous program execution is somewhat similar to the above. Your program is executed line by line, one line at a time. Each time a function is called, program execution waits until that function returns before continuing to the next line of code. 
+ 
+This method of execution can have undesirable ramifications. Suppose a function is called to start a time consuming process. What if you want to stop the lengthy process? With synchronous execution, your program is “stuck,” waiting for the process to end, with no way out.
+ 
+Asynchronous execution avoids this bottleneck. You are essentially saying, “I know this function call is going to take a great deal of time, but my program doesn’t want to wait around while it executes.”
+ 
+ 
+ --
+ Within a Java application you work with several threads to achieve parallel processing or asynchronous behavior. Concurrency promises to perform certain task faster as these tasks can be divided into subtasks and these subtasks can be executed in parallel. Of course the runtime is limited by parts of the task which can be performed in parallel.
+ 
+ 
+ 
+ --
+ Advantages of Thread 
+ Threads are lightweight compared to processes
+ Threads share the same address space and therefore can share both data and code
+ Context switching between threads is usually less expensive than between processes
+Cost of thread intercommunication is relatively low that that of process intercommunication
+Threads allow different tasks to be performed concurrently.
+
+ 
+ --
+The main thread
+When we run any java program, the program begins to execute its code starting from the main method. Therefore, the JVM creates a thread to start executing the code present in main method. This thread is called as main thread.
+It is the thread from which other “child” threads will be created.
+Generally it must be the last thread to finish execution because it performs various shutdown actions.
+
+Threads will be of two types.
+1. Foreground threads i.e application threads i.e visible or running as front end
+2. Background thread daemon thread which is not visible. 
+JVM will be running till all the foreground threads are running. Once all the foreground are complete then only jvm will exists. jvm will not wait for background thread. 
+
+
+Threads can be created by using two mechanisms :
+1. Extending the Thread class
+2. Implementing the Runnable Interface
+
+
+
+
+
+1. Extending the Thread class
+create a new class that extends Thread class using the following two simple steps.
+Override run( ) method available in Thread class. This method provides an entry point for the thread and you will put your complete business logic inside this method. 
+start it by calling start() method, which executes a call to run( ) method.
+
+<<example 1 >>
+<< example 2>>
+
+2. Implementing the Runnable Interface
+
+Implement a run() method provided by a Runnable interface.This method provides an entry point for the thread and you will put your complete business logic inside this method.
+Instantiate a Thread object using the following constructor. Thread(Runnable threadObj, String threadName);
+start it by calling start() method, which executes a call to run( ) method
+
+<< Example 3>>
+
+
+
+
+-----------------------
+Extending Vs Implementing :
+When you extends Thread class, after that you can’t extend any other class which you required. Java does not allow inheriting more than one class.
+When you implements Runnable, you can save a space for your class to extend any other class in future or now.
+If your class provides more functionality rather than just running as Thread, you should implement Runnable interface to provide a way to run it as Thread. If your class only goal is to run as Thread, you can extend Thread class.
+Significant difference between implementing Runnable and extending Thread is that by extending Thread, each of your threads has a unique object associated with it, whereas implementing Runnable, many threads can share the same object instance.
+
+//Implement Runnable Interface...
+ class ImplementsRunnable implements Runnable {
+
+private int counter = 0;
+
+public void run() {
+    counter++;
+    System.out.println("ImplementsRunnable : Counter : " + counter);
+ }
+}
+
+
+//Extend Thread class...
+class ExtendsThread extends Thread {
+
+private int counter = 0;
+
+public void run() {
+    counter++;
+    System.out.println("ExtendsThread : Counter : " + counter);
+ }
+}
+
+public class ThreadVsRunnable {
+
+public static void main(String args[]) throws Exception {
+    // Multiple threads share the same object.
+    ImplementsRunnable rc = new ImplementsRunnable();
+    Thread t1 = new Thread(rc);
+    t1.start();
+    Thread.sleep(1000); // Waiting for 1 second before starting next thread
+    Thread t2 = new Thread(rc);
+    t2.start();
+    Thread.sleep(1000); // Waiting for 1 second before starting next thread
+    Thread t3 = new Thread(rc);
+    t3.start();
+
+    // Creating new instance for every thread access.
+    ExtendsThread tc1 = new ExtendsThread();
+    tc1.start();
+    Thread.sleep(1000); // Waiting for 1 second before starting next thread
+    ExtendsThread tc2 = new ExtendsThread();
+    tc2.start();
+    Thread.sleep(1000); // Waiting for 1 second before starting next thread
+    ExtendsThread tc3 = new ExtendsThread();
+    tc3.start();
+ }
+}
+
+Output of the above program.
+ImplementsRunnable : Counter : 1
+ImplementsRunnable : Counter : 2
+ImplementsRunnable : Counter : 3
+ExtendsThread : Counter : 1
+ExtendsThread : Counter : 1
+ExtendsThread : Counter : 1
+
+In the Runnable interface approach, only one instance of a class is being created and it has been shared by different threads. So the value of counter is incremented for each and every thread access.
+Whereas, Thread class approach, you must have to create separate instance for every thread access. Hence different memory is allocated for every class instances and each has separate counter, the value remains same, which means no increment will happen because none of the object reference is same.
+
+When to use Runnable?
+Use Runnable interface when you want to access the same resource from the group of threads. Avoid using Thread class here, because multiple objects creation consumes more memory and it becomes a big performance overhead.
+And implementing is always a better way to work in java then inherting. 
+
+ 
+ 
+ -------
+ 
+ Life cycle of a Thread
+
+New : A thread begins its life cycle in the new state. It remains in this state until the start() method is called on it.
+Runnable : After invocation of start() method on new thread, the thread becomes runnable. Once you invoke start() method, Lock Status: Can Acquire Locks; This is the method called to schedule a thread to run. Once scheduled and a CPU cycle is available the thread actually runs.It is the responsibility of the thread scheduler to give the thread, time to run.
+Running : A thread is in running state if the thread scheduler has selected it.
+Waiting : A thread is in waiting state if it waits for another thread to perform a task. In this stage the thread is still alive. It’s the responsibility of the thread scheduler to reactivate and schedule a blocked/waiting thread.A thread is in the blocked state when it tries to access a protected section of code that is currently locked by some other thread. When the protected section is unlocked, the schedule picks one of the thread which is blocked for that section and moves it to the runnable state. Whereas, a thread is in the waiting state when it waits for another thread on a condition.
+Terminated : A thread enter the terminated state when it complete its task.
+ 
+ 
+ --------------
+ Thread Methods
+ setName()
+to give thread a name
+getName()
+return thread's name
+getPriority()
+return thread's priority
+isAlive()
+checks if thread is still running or not
+join()
+Wait for a thread to end.The current thread invokes this method on a second thread, causing the current thread to block until the second thread terminates or the specified number of milliseconds passes.
+run()
+Entry point for a thread
+sleep()
+suspend thread for a specified time
+start()
+start a thread by calling run() method
+SetPriority(int priority)
+Sets the priority of this Thread object. The possible values are between 1 and 10.MIN-PRIORITY (a constant of 1)
+MAX-PRIORITY (a constant of 10). By default every thread is given a NORM-PRIORITY(5). The main thread always have NORM-PRIORITY. 
+interrupt()
+Interrupts this thread, causing it to continue execution if it was blocked for any reason.
+
+Note: Thread priorities cannot guarantee that a higher priority thread will always be executed first than the lower priority thread. The selection of the threads for execution depends upon the thread scheduler which is platform dependent. 
+
+
+Some static methods that are commonly used by thread objects.
+Thread.sleep()
+This static method asks the system to put the current thread to sleep for (approximately) the specified amount of time, effectively allowing us to implement a "pause". A thread can be interrupted from its sleep. It throws an interrupted exception, which needs to be handled by the programmer. 
+yield()
+This method effectively tells the system that the current thread is  not most priority right now and it can give CPU to some other tread. What it actually does is quite system-dependent.This method yields or transfers control to another thread of equal priority. It does not provide any guarantee regarding which thread it will transfer control to or whether it will at all.
+
+
+
+wait() :  The wait() method causes the current thread to pause execution and move to a wait state. 
+notify()  The notify() method notifies an arbitrary thread that is waiting to obtain a lock on the currently shared object.
+notifyAll() The notifyAll() counterpart of this method notifies all threads that are waiting to acquire a lock on the shared object.
+
+
+
+------------------------
+
+<Example >
+----------------------
+
+Thread Synchronization
+
+There are some methods or blocks which needs to acquire lock. For example if you are booking a movie
+ticket and you have blocked a seat and making a payment now to reserve now during this time other threads
+should not be able to reserver the seats and they should be made to wait or should be chained or queued 
+for this completion till this resource is either reserverd or released for other threads.  Such methods should
+be syncronized.  
+
+Before going into more theory lets understand the problem with example. Lets say we are creating a new thread and 
+passing two messages. Each message has two parts.  
+Message 1 : Part:1  Hello  Hello how are you Mr  Part:2 itvilla
+Message 2 : Part:2  Hello How are you Mrs Part:2 Xyz
+Message 3 : Part:1  Hello How are you child Part:2 abc
+
+Now while we are going to start different threds but we want one message to be delivered and then 
+second and then third. Sequence is important otherwsie we might have a message with no importance.
+ 
+
+Example code 
+
+Output : 
+Hello child Hello how are you Mr Hello How are you Mrs  ABZ 
+ XTZ 
+itvilla
+
+Race Condition 
+By default all threads will be in a  race condition.  i.e all threads will be running to win the race, who wins is not predicate. 
+i.e all threads are running to complete the job without sync or talking to other threads
+
+See the above example. The above order of execution is just one possibility. There can be many such orders in which these operations can execute making the program’s output inconsistent.
+When multiple threads try to read and write a shared variable concurrently, and these read and write operations overlap in execution, then the final outcome depends on the order in which the reads and writes take place, which is unpredictable. This phenomenon is called Race condition.
+
+Thread interference errors can be avoided by synchronizing access to shared variables.  We will see that in next section
+
+
+output might vary but its definatly not the way we want since all three threads are running in parllel 
+and accessing your print message at the time they want. Something situation demands that some methods are thread safe i.e sometimes not multiple people can use the same method. example ticket booking system.
+
+Synchronized keyword Method in the printmsg method of PrintMessage class will ensure that only one thread is printing the message a time which will make the output very meaning full. 
+Just one change to be done in above setup and output will be great.  Now for this method only one tread can enter a time. Queue of threads is created when it encounters Syncronized keyword.
+
+
+Example 
+
+Hello child  ABZ 
+Hello how are you Mr itvilla
+Hello How are you Mrs  XTZ 
+
+
+Memory Consistency Errors
+
+Memory inconsistency errors occur when different threads have inconsistent views of the same data. This happens when one thread updates some shared data, but this update is not propagated to other threads, and they end up using the old data.
+
+Why does this happen? Well, there can be many reasons for this. The compiler does several optimizations to your program to improve performance. It might also reorder instructions in order to optimize performance. Processors also try to optimize things, for instance, a processor might read the current value of a variable from a temporary register (which contains the last read value of the variable), instead of main memory (which has the latest value of the variable).
+
+
+
+
+
+
+
+
+
+
+
+------------------------
+synchronized keyword and synchronized block
+
+You can use synchronized keyword on block as well. When we use synchronized keyword with a method, it acquires a lock in the object for the whole method. It means that no other thread can use any synchronized method until the current thread, which has invoked it's synchronized method, has finished its execution.
+
+synchronized block acquires a lock in the object only between parentheses after the synchronized keyword. This means that no other thread can acquire a lock on the locked object until the synchronized block exits. But other threads can access the rest of the code of the method.
+
+Perfomance Tip
+synchronized keyword causes a performance cost. A synchronized method in Java is very slow and can degrade performance. So we must use synchronization keyword in java when it is necessary else, we should use Java synchronized block that is used for synchronizing critical section only.
+
+
+-------------------
+Inter-Thread Communications
+
+
+----------------
+Volatile Keyword
+
+Volatile keyword is used to avoid memory consistency errors in multithreaded programs. It tells the compiler to avoid doing any optimizations to the variable. If you mark a variable as volatile, the compiler won’t optimize or reorder instructions around that variable.
+
+Also, The variable’s value will always be read from the main memory instead of temporary registers.
+
+
