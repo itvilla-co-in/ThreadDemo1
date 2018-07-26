@@ -281,6 +281,97 @@ synchronized keyword causes a performance cost. A synchronized method in Java is
 -------------------
 Inter-Thread Communications
 
+Lets imagine that producer is producing phones and it can have a maximum inventory of 10 phones and consumer has to consume the phones that are produced by producer. Here consumer cannot consume if prouder has not produced and producer cannot produce more than 10 if cosumer has not consumed so there is a relations.  If producer and consumer are two threads then they need to talk to each other. This is where wait and notify/notifyall will come into picture.
+
+Producer thread will keep on producing phones till it reaches maximum limit of production of 10 phones. On limit reached it will wait for the phones to be consumed this is where wait() will come into picture. It tells the calling thread to give up the lock and go to sleep until some other thread enters the same monitor and calls notify().  
+While producer keeps on producing phone one by one It wakes up all the threads that called wait() on the same object.  In our case if consumer is waiting for producer to produce some phones this notification will let consumer know that phone is ready start consuming.
+
+Consumer does consumption of the phone and it removes the consumed product from the bucket and notifies the producer that it has consumed some thing so its waiting to produce more phones you can start now. 
+
+This program is kind of infinate loop where producer thred will keep on producing and consumer thread will keep on consuing. You need to force stop this program if you run.
+
+Below are some methods we use for inter-thread communiction. 
+1. wait() tells calling thread to give up monitor and go to sleep until some other thread enters the same monitor and call notify.
+Note that wait() can only be called from a synchronized block/method and gets up  when notify() or notifyAll() method is called.
+2. notify() wakes up a thread that called wait() on same object.
+3. notifyAll() wakes up all the thread that called wait() on same object.
+4. yield() method pauses the currently executing thread temporarily for giving a chance to the remaining waiting threads of the same priority to execute. If there is no waiting thread or all the waiting threads have a lower priority then the same thread will continue its execution. The yielded thread when it will get the chance for execution is decided by the thread scheduler whose behavior is vendor dependent.It is a hint (not guarenteed) to the scheduler that you have done enough and that some other thread of same priority might run and use the CPU.
+5. join() If any executing thread t1 calls join() on t2 i.e; t2.join() immediately t1 will enter into waiting state until t2 completes its execution.
+Note that sleep is used just on a thread and it just causes the current thread to sleep (temporarily cease execution for specified  timelimit).  This has not role on communication between threads. 
+
+Below example uses wait and notify methods.
+
+
+
+Output
+Producer has prodcued value for consuption 2007348947
+Producer has prodcued value for consuption -473017395
+Producer has prodcued value for consuption -1443635485
+Producer has prodcued value for consuption 1281021033
+Producer has prodcued value for consuption 729460945
+Producer has prodcued value for consuption -1580074215
+Producer has prodcued value for consuption -1345503556
+Producer has prodcued value for consuption -275379055
+Producer has prodcued value for consuption 680467370
+Producer has prodcued value for consuption 1213613010
+Producer thread is full waiting for consumer to consme
+consuming value2007348947
+consuming value-473017395
+consuming value-1443635485
+consuming value1281021033
+consuming value729460945
+consuming value-1580074215
+consuming value-1345503556
+consuming value-275379055
+consuming value680467370
+consuming value1213613010
+there is nothing to consume waiting for producer
+Producer has prodcued value for consuption 1671701803
+Producer has prodcued value for consuption -1101916659
+Producer has prodcued value for consuption -1784458152
+Producer has prodcued value for consuption -1546684753
+Producer has prodcued value for consuption -2086052066
+Producer has prodcued value for consuption -1883451483
+Producer has prodcued value for consuption 58759285
+Producer has prodcued value for consuption -1012392875
+Producer has prodcued value for consuption 211365659
+Producer has prodcued value for consuption -1307571945
+Producer thread is full waiting for consumer to consme
+consuming value1671701803
+consuming value-1101916659
+---------------------
+Joining Example 
+
+Lets run a simple program as below and run two threads. Here both threads will start running indepandantly. 
+When thread tA call tB.join() its causes not only waits for tB to die or tA be interrupted itself but create happens-before relation between last statement in tB and next statement after tB.join() in tA thread.
+Join is used only when one thread must wait for the open to finish (lets say thread A prepares a file and thread B cannot continue until the file is ready)
+
+
+Here is the reason to use join: You use it when final result depends on result of two tasks which could run at the same time.
+
+Example1: After user clicks submit button the program has to call two external webservices to update their respective systems. It can be done at the same time that is why we would create a separate thread for one of webservices.
+
+The user will sit before the screen and wait for a notification: Your submission is OK! The screen should say OK only after both threads finished.
+
+ 
+
+Output :
+Output without join
+ hello Here is your messageitvilla1
+ hello Here is your messageitvilla2
+Your count 0
+Your count 1
+Your count 2
+Your count 3
+Your count 0
+Your count 1
+Your count 2
+Your count 3
+Your count 4
+Your count 5
+
+
+modified call with join
 
 ----------------
 Volatile Keyword
